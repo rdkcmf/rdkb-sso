@@ -37,7 +37,6 @@ void logOut( char *logline );
 #define logOut(ptr)
 #endif
 
-//int SSOgetJWT( char *pURI, char *pClient_Id, char* pParams, char *pFileName );
 static size_t curl_write_data(void *ptr, size_t size, size_t nmemb, void *stream);
-static int getClientSecret( char *cs );
+static int getClientSecret( char *cs, char *pClientId );
 #endif

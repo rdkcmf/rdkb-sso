@@ -32,6 +32,8 @@
 #define CS_CMD "getConfigFile"
 #define CS_FILE_DIR "/tmp/.webui"
 #define CS_FILE_NAME "/tmp/.webui/rcdefal.lll"
+#define CS_FILE_NAME_2021 "/tmp/.webui/dfjejks.db1"
+#define CLIENTID_2021 "rdk_sso_2021"
 #define CURL_FILE_WRITE   // defined for writing to file
 
 #ifdef ENABLE_SSO_LOGS
@@ -87,7 +89,7 @@ int getToken( char *pURI, char *pClientId, char* pParams, void *pJWT )
         pPostFields = malloc( len );
         if( pPostFields != NULL )
         {
-            if( getClientSecret( ClientSecret ) == 0 )
+            if( getClientSecret( ClientSecret, pClientId ) == 0 )
             {
                 snprintf( pPostFields, len, "%s%c%s%c%s%s%c%s%s", pParams, '&',
                           pGrantType, '&', pClientIDName, pClientId, '&',
@@ -122,10 +124,11 @@ int getToken( char *pURI, char *pClientId, char* pParams, void *pJWT )
     return iRet;
 }
 
-static int getClientSecret( char *cs )
+static int getClientSecret( char *cs, char *pClientId )
 {
     FILE *fp;
     char *tmpptr;
+    char *cs_file;
     int i;
     int iRet = 1;
     char cmdbuf[256];
@@ -136,11 +139,19 @@ static int getClientSecret( char *cs )
     {
         mkdir( CS_FILE_DIR, S_IRWXU | S_IRWXG | S_IRWXO );    // we don't care about errors
         *cs = 0;        // just NULL string
+        if( strncmp( pClientId, CLIENTID_2021, strlen( CLIENTID_2021 ) ) == 0 )
+        {
+            cs_file = CS_FILE_NAME_2021;
+        }
+        else
+        {
+            cs_file = CS_FILE_NAME;
+        }
         i = sizeof( cmdbuf );
-        snprintf( cmdbuf, i - 1, ". %s; %s %s", CS_CMD_FILE, CS_CMD, CS_FILE_NAME );
+        snprintf( cmdbuf, i - 1, ". %s; %s %s", CS_CMD_FILE, CS_CMD, cs_file );
         system( cmdbuf );
         memwipe( cmdbuf, i );
-        if( ( fp = fopen ( CS_FILE_NAME, "r" ) ) != NULL )
+        if( ( fp = fopen ( cs_file, "r" ) ) != NULL )
         {
             tmpptr = cs;
             // exit on EOF or 0x0a
@@ -156,7 +167,7 @@ static int getClientSecret( char *cs )
         {
             logOut( "getClientSecret: Unable to open file for reading\n" );
         }
-        remove( CS_FILE_NAME );
+        remove( cs_file );
     }
 
     return iRet;
