@@ -30,22 +30,30 @@ int SSOgetJWT( char *pURI, char *pClient_Id, char* pParams, char *pFileName )
     int iRet = 1;
 
 logOut( "SSOgetJWT: Entrance\n" ) ;
-    if( (pJWT=fopen( pFileName, "w" )) != NULL )
-    { 
-        if( getToken( pURI, pClient_Id, pParams, pJWT ) == 0 )
-        {
-            iRet = 0;
+    if( pURI != NULL && pClient_Id != NULL && pParams != NULL && pFileName != NULL )
+    {
+        if( (pJWT=fopen( pFileName, "w" )) != NULL )
+        { 
+            if( getToken( pURI, pClient_Id, pParams, pJWT ) == 0 )
+            {
+                iRet = 0;
+            }
+            else
+            {
+                logOut( "SSOgetJWT: Error, Cannot get token!!\n" ) ;
+            }
+            fclose( pJWT );
         }
         else
         {
-            logOut( "SSOgetJWT: Error, Cannot get token!!\n" ) ;
+            logOut( "SSOgetJWT: Error, Cannot open file for token storage!!\n" ) ;
+            iRet = 2;
         }
-        fclose( pJWT );
     }
     else
     {
-        logOut( "SSOgetJWT: Error, Cannot open file for token storage!!\n" ) ;
-        iRet = 2;
+        logOut( "SSOgetJWT: FAILED, argument is NULL\n" );
+        iRet = 3;
     }
 
 logOut( "SSOgetJWT: Exiting\n" ) ;
